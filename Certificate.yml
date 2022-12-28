@@ -1,0 +1,36 @@
+---
+ - name: Generate private key and CSR file
+   hosts: servers
+   connection: local
+   
+   vars:
+    CN: storefront.domain.com
+    dns_server:
+     - hostname.domain.com
+     - storefront.domain.com
+   
+   tasks:
+    - name: Generate Private Key
+      openssl_privatekey:
+       path: /home/pravin/Ansible-CSR/privatekey.key
+       size: 2048
+       mode: 0600
+       type: RSA
+      register: privatekey
+   
+    - name: Generate OpenSSL Certificate 
+      openssl_csr:
+       path: /home/pravin/Ansible-CSR/Certificate.cer
+       privatekey_path: /home/pravin/Ansible-CSR/privatekey.key
+       common_name: "{{ CN }}"
+       mode: '700'
+       digest: sha256
+       email_address: abc@xyz.com
+       country_name: US
+       locality_name:
+       organization_name:
+       state_or_province_name:
+       subject_alt_name: "{{ item.value | map('regex_replace', '^', 'DNS:') | list }}"
+      with_dict:
+       dns_server: "{{dns_server}}"
+      register: csr
