@@ -1,0 +1,38 @@
+---
+ - name: Running Python Script - Schedule Task
+   hosts: servers
+   connection: local
+   
+   tasks:
+    - name: Execute script1
+      script: Hello1.py
+      args:
+       executable: python3
+      ignore_errors: true
+      register: python_result1
+      
+    - name: Execute script2
+      script: Hello2.py
+      args:
+       executable: python3
+      ignore_errors: true
+      register: python_result2
+      
+    - name: Execute script
+      script: Hello3.py
+      args:
+       executable: python3
+      ignore_errors: true
+      register: python_result3
+
+    - name: Send Email On Failure
+      mail:
+       host: smtp.gmail.com
+       port: 587
+       username: 
+       password: 
+       secure: starttls
+       to: 
+       subject: Ansible Failure - Schedule Job
+       body: "Ansible Job Failed on Machine with below  \n Script1: \nerror {{ python_result1.stderr }} \n \n Script2: {{ python_result2.stderr }} \n \n Script3: {{  python_result3.stderr  }}"
+      when: python_result1.stderr != '' or python_result2.stderr != '' or python_result3.stderr != ''
